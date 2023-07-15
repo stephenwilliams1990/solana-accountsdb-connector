@@ -1,10 +1,10 @@
 [workspace]
 members = [
         "geyser-plugin-grpc",
-        "lib",
-        "connector-raw",
-        "connector-mango",
-        "mango-pnl-service",
+        #"lib",
+        #"connector-raw",
+        #"connector-mango",
+        #"mango-pnl-service",
 ]
 
 
