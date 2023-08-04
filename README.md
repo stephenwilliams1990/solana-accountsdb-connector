@@ -20,8 +20,6 @@ Supported Solana sources:
 Unfinished Solana sources:
 - JSONRPC websocket subscriptions plus JSONRPC HTTP API (for initial snapshots)
 
-Supported targets:
-- PostgreSQL
 
 
 Components
@@ -83,55 +81,12 @@ Design and Reliability
 ======================
 
 ```
-Solana    --------------->   Connector   ----------->   PostgreSQL
+Solana    --------------->   Connector 
  nodes      jsonrpc/gRPC       nodes
 ```
 
 For reliability it is recommended to feed data from multiple Solana nodes into
 each Connector node.
 
-It is also allowed to run multiple Connector nodes that target the same
-PostgeSQL target database.
-
 The Connector service is stateless (except for some caches). Restarting it is
 always safe.
-
-If the Solana node is down, the Connector service attempts to reconnect and
-then requests a new data snapshot if necessary.
-
-If PostgeSQL is down temporarily, the Connector service caches updates and
-applies them when the database is back up.
-
-If PostgreSQL is down for a longer time, the Connector service exits with
-an error. On restart, it pauses until PostgreSQL is back up, and then starts
-pulling data from the Solana nodes again.
-
-
-PostgreSQL data layout
-======================
-
-See `scripts/` for SQL that creates the target schema.
-
-The Connector streams data into the `account_write` and `slot` tables. When
-slots become "rooted", older `account_write` data rooted slots is deleted. That
-way the current account data for the latest rooted, confirmed or processed slot
-can be queried, but older data is forgotten.
-
-When new slots arrive, the `uncle` column is updated for "processed" and
-"confirmed" slots to allow easy filtering of slots that are no longer part of
-the chain.
-
-Example for querying confirmed data:
-```
-SELECT DISTINCT ON(pubkey_id)
-    pubkey, account_write.*
-FROM account_write
-LEFT JOIN slot USING(slot)
-INNER JOIN pubkey USING(pubkey_id)
-WHERE status = 'Rooted' OR status IS NULL OR (uncle = FALSE AND status = 'Confirmed')
-ORDER BY pubkey_id, slot DESC, write_version DESC;
-```
-
-For each pubkey, this gets the latest (most recent slot, most recent
-write_version) account data; limited to slots that are either rooted or
-(confirmed and not an uncle).
