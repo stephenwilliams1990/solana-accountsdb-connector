@@ -70,28 +70,7 @@ Setup Tutorial
 
    Check the logs to ensure the plugin was loaded.
 
-4. Prepare the connector configuration file.
-
-   [Here is an example](connector-raw/example-config.toml).
-
-   - `rpc_ws_url` is unused and can stay empty.
-   - `connection_string` for your `grpc_sources` must point to the gRPC server
-     address configured for the plugin.
-   - `rpc_http_url` must point to the JSON-RPC URL.
-   - `connection_string` for your `posgres_target` uses [the tokio-postgres syntax](https://docs.rs/tokio-postgres/0.7.5/tokio_postgres/config/struct.Config.html)
-   - `program_id` must match what is configured for the gRPC plugin
-
-5. Prepare the PostgreSQL schema.
-
-   Use [this example script](connector-raw/scripts/create_schema.sql).
-
-6. Start the connector service binary.
-
-   Pass the path to the config file as the first argument. It logs to stdout.
-   It should be restarted on exit. (it intentionally terminates when postgres is
-   unreachable for too long, for example)
-
-7. Monitor the logs
+4. Monitor the logs
 
    `WARN` messages can be recovered from. `ERROR` messages need attention.
 
